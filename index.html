@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI의 발전과 그걸 지켜보는 내 기분</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@700;900&display=swap">
+<style>
+/* Layout: a two-column diary board. Left column = what the AI tools shipped that day (squares and dots), right column = the watcher's mood (one big face per day). */
+:root {
+  --bg: #F2F4F1;
+  --surface: #FBFCFA;
+  --ink: #17212A;
+  --muted: #5A6770;
+  --rule: #D3D9D4;
+  --shade: #E6EAE5;
+  --mood: #FFF3D6;
+  --accent: #1D5C7A;
+  --on-accent: #FFFFFF;
+  --c-claude: #C4532A;
+  --c-codex: #0E7C86;
+  --c-copilot: #6D4AC4;
+  --c-gemini: #A07408;
+  --k-improved: #5F8CA3;
+  --k-changed: #2F6480;
+  --k-fixed: #B4C2CA;
+  --k-other: #8A8F94;
+  --f-display: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
+  --f-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --f-hand: "Gaegu", "Apple SD Gothic Neo", "Malgun Gothic", cursive;
+  --f-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171C; --surface: #182027; --ink: #E5EAE7; --muted: #98A5AC; --rule: #2B363F; --shade: #1C252D; --mood: #2A2618;
+    --accent: #7CC0DE; --on-accent: #0E1519; --c-claude: #F0825A; --c-codex: #3FC1C9; --c-copilot: #A68BF0; --c-gemini: #E0B54A;
+    --k-improved: #6FA3BD; --k-changed: #A9D3E6; --k-fixed: #3A4954; --k-other: #6B757C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171C; --surface: #182027; --ink: #E5EAE7; --muted: #98A5AC; --rule: #2B363F; --shade: #1C252D; --mood: #2A2618;
+  --accent: #7CC0DE; --on-accent: #0E1519; --c-claude: #F0825A; --c-codex: #3FC1C9; --c-copilot: #A68BF0; --c-gemini: #E0B54A;
+  --k-improved: #6FA3BD; --k-changed: #A9D3E6; --k-fixed: #3A4954; --k-other: #6B757C;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
+.wrap { max-width: 960px; margin-inline: auto; padding-inline: 20px; padding-block: 52px 80px; display: flex; flex-direction: column; gap: 60px; }
+section, header { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+p, ul, h1, h2, h3, figure, table { margin: 0; }
+p { max-width: 40em; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--f-mono); font-size: 0.9em; background: var(--shade); padding: 1px 5px; border-radius: 3px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.8rem; letter-spacing: 0.06em; color: var(--muted); }
+h1 { font-family: var(--f-display); font-weight: 900; font-size: clamp(1.9rem, 5.6vw, 3.1rem); line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.5rem; line-height: 1.35; text-wrap: balance; padding-top: 20px; border-top: 2px solid var(--ink); }
+h3 { font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.lead { font-size: 1.08rem; }
+.note { color: var(--muted); font-size: 0.86rem; line-height: 1.6; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 6px; flex: none; }
+.p-claude { --c: var(--c-claude); } .p-codex { --c: var(--c-codex); } .p-copilot { --c: var(--c-copilot); } .p-gemini { --c: var(--c-gemini); } .p-all { --c: var(--muted); }
+.emoji { font-family: var(--f-emoji); line-height: 1; }
+
+/* week at a glance */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 12px 12px; }
+.wk { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.wk .emoji { font-size: clamp(1.5rem, 5.4vw, 2.6rem); }
+.wk .n { font-family: var(--f-mono); font-weight: 500; font-size: clamp(0.78rem, 2.4vw, 1rem); font-variant-numeric: tabular-nums; }
+.wk .bar { width: min(100%, 56px); background: var(--c-claude); border-radius: 3px 3px 0 0; min-height: 2px; }
+.wk .d { font-family: var(--f-mono); font-size: clamp(0.68rem, 2.1vw, 0.85rem); border-top: 1px solid var(--ink); width: 100%; text-align: center; padding-top: 5px; line-height: 1.35; }
+.wk .d small { display: block; color: var(--muted); font-size: 0.92em; }
+
+/* quiz */
+.quiz { display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 22px 20px; }
+.quiz .q { font-family: var(--f-display); font-weight: 700; font-size: 1.2rem; line-height: 1.5; max-width: none; text-wrap: balance; }
+.choices { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.choices button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--ink); border-radius: 4px; padding: 12px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.35; }
+.choices button b { font-family: var(--f-mono); font-weight: 500; font-size: 1.5rem; }
+.choices button span { font-size: 0.8rem; color: var(--muted); }
+.choices button:hover { background: var(--shade); }
+.choices button[aria-pressed="true"] { border-width: 2px; padding: 11px 7px; }
+.choices button.right { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.choices button.right span { color: var(--on-accent); }
+@media (max-width: 640px) { .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+#quiz-msg { font-weight: 500; min-height: 1.7em; max-width: none; }
+.answer { display: flex; flex-direction: column; gap: 14px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px 24px; }
+.stats div { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.stats b { font-family: var(--f-mono); font-weight: 500; font-size: clamp(1.8rem, 5vw, 2.5rem); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* the board */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.84rem; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; }
+.legend i.round { border-radius: 50%; background: var(--ink); }
+.legend i.hollow { border-radius: 50%; background: var(--surface); border: 1.6px solid var(--ink); }
+.k-added { background: var(--c-claude); } .k-improved { background: var(--k-improved); } .k-changed { background: var(--k-changed); } .k-fixed { background: var(--k-fixed); } .k-other { background: var(--k-other); }
+.board { display: flex; flex-direction: column; border: 1px solid var(--ink); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.brow { display: grid; grid-template-columns: minmax(0, 1fr) clamp(112px, 31%, 290px); }
+.brow + .brow { border-top: 1px solid var(--ink); }
+.bhead { background: var(--ink); color: var(--bg); font-family: var(--f-display); font-weight: 700; }
+.bhead > div { padding: 10px 16px; font-size: 1.05rem; }
+.bhead > div + div { text-align: center; padding-inline: 8px; }
+.ai { padding: 18px 16px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ai .top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
+.ai .top b { font-family: var(--f-mono); font-weight: 500; font-size: clamp(1.5rem, 5vw, 2rem); line-height: 1.1; }
+.ai .top .wd { font-weight: 600; }
+.ai .top .cnt { font-family: var(--f-mono); font-size: 0.82rem; color: var(--muted); margin-left: auto; }
+.cap { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+.cap b { color: var(--ink); font-weight: 500; }
+.waffle { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 2px; max-width: 400px; }
+.waffle i { display: block; aspect-ratio: 1; border-radius: 1.5px; }
+.empty { max-width: 400px; border: 1px dashed var(--muted); border-radius: 4px; padding: 10px 12px; color: var(--muted); font-size: 0.86rem; }
+.strip { position: relative; height: 44px; max-width: 520px; border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); background: linear-gradient(to right, transparent calc(25% - 0.5px), var(--rule) calc(25% - 0.5px), var(--rule) calc(25% + 0.5px), transparent calc(25% + 0.5px), transparent calc(50% - 0.5px), var(--rule) calc(50% - 0.5px), var(--rule) calc(50% + 0.5px), transparent calc(50% + 0.5px), transparent calc(75% - 0.5px), var(--rule) calc(75% - 0.5px), var(--rule) calc(75% + 0.5px), transparent calc(75% + 0.5px)); }
+.strip i { position: absolute; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--c); }
+.strip i.pre { background: var(--surface); border: 1.6px solid var(--c); }
+.hours { display: flex; justify-content: space-between; max-width: 520px; font-family: var(--f-mono); font-size: 0.68rem; color: var(--muted); margin-top: -8px; }
+.chips { display: flex; flex-direction: column; gap: 5px; padding: 0; list-style: none; font-size: 0.92rem; line-height: 1.5; }
+.chips li { display: flex; align-items: baseline; }
+.chips .dot { transform: translateY(-1px); }
+.aside { font-size: 0.84rem; color: var(--muted); border-left: 2px solid var(--rule); padding-left: 10px; }
+.mood { background: var(--mood); border-left: 1px solid var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 18px 10px; text-align: center; min-width: 0; }
+.face { font-family: var(--f-emoji); font-size: clamp(3rem, 12vw, 5.6rem); line-height: 1.1; display: inline-block; }
+.say { font-family: var(--f-hand); font-weight: 700; font-size: clamp(1.02rem, 3.3vw, 1.45rem); line-height: 1.3; background: var(--surface); border: 1.5px solid var(--ink); border-radius: 14px; padding: 8px 12px; position: relative; max-width: 100%; text-wrap: balance; }
+.say::before { content: ""; position: absolute; top: -8px; left: 50%; width: 13px; height: 13px; margin-left: -7px; background: var(--surface); border-left: 1.5px solid var(--ink); border-top: 1.5px solid var(--ink); transform: rotate(45deg); }
+.why { font-family: var(--f-mono); font-size: clamp(0.66rem, 2vw, 0.78rem); color: var(--muted); line-height: 1.4; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes shake { 0%, 14%, 100% { transform: translateX(0) rotate(0); } 2%, 6%, 10% { transform: translateX(-4px) rotate(-5deg); } 4%, 8%, 12% { transform: translateX(4px) rotate(5deg); } }
+@keyframes tilt { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes hop { 0%, 30%, 100% { transform: translateY(0) rotate(0); } 10% { transform: translateY(-12px) rotate(-8deg); } 20% { transform: translateY(-3px) rotate(6deg); } }
+.a-bob { animation: bob 3.2s ease-in-out infinite; } .a-shake { animation: shake 3.4s linear infinite; } .a-tilt { animation: tilt 4.5s ease-in-out infinite; } .a-hop { animation: hop 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .face { animation: none; } }
+
+/* weekly timeline */
+figure { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.timeline { display: block; width: 100%; min-width: 760px; height: auto; font-family: var(--f-body); }
+.timeline .day { fill: var(--muted); font-size: 12.5px; font-family: var(--f-mono); }
+.timeline .lane-name { fill: var(--ink); font-size: 13.5px; font-weight: 600; }
+.timeline .lane-sub { fill: var(--muted); font-size: 11.5px; }
+.timeline .grid { stroke: var(--rule); stroke-width: 1; fill: none; }
+.timeline .noon { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 4; fill: none; }
+.timeline .weekend { fill: var(--shade); }
+.timeline .stable { fill: var(--c); }
+.timeline .pre { fill: var(--surface); stroke: var(--c); stroke-width: 1.6; }
+
+/* awards */
+.awards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 28px; }
+.award { display: flex; flex-direction: column; gap: 5px; min-width: 0; border-top: 1px solid var(--rule); padding-top: 14px; }
+.award .big { font-family: var(--f-mono); font-weight: 500; font-size: 2rem; line-height: 1.1; color: var(--c, var(--ink)); }
+.award .prize { font-family: var(--f-display); font-weight: 700; font-size: 1.12rem; line-height: 1.4; }
+.award .winner { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; }
+.award p { font-size: 0.9rem; line-height: 1.6; color: var(--muted); }
+@media (max-width: 760px) { .awards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .awards { grid-template-columns: minmax(0, 1fr); } }
+
+/* verdict */
+.split { display: flex; height: 34px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.split span { display: block; height: 100%; }
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 28px; }
+.trio div { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.trio b { font-family: var(--f-display); font-weight: 900; font-size: clamp(1.4rem, 4.4vw, 2rem); line-height: 1.25; }
+.trio span { font-size: 0.88rem; color: var(--muted); line-height: 1.55; }
+@media (max-width: 560px) { .trio { grid-template-columns: minmax(0, 1fr); } }
+.moods { font-family: var(--f-emoji); font-size: clamp(1.6rem, 6.5vw, 2.8rem); letter-spacing: 0.08em; line-height: 1.3; }
+.punch { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.15rem, 3.6vw, 1.5rem); line-height: 1.5; text-wrap: balance; max-width: 30em; }
+.cookie { background: var(--surface); border: 1px dashed var(--muted); border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.cookie .eyebrow { color: var(--accent); }
+
+details { border-top: 2px solid var(--ink); padding-top: 16px; }
+summary { cursor: pointer; font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; }
+details .inner { display: flex; flex-direction: column; gap: 18px; padding-top: 18px; }
+details ul { padding-left: 1.15em; display: flex; flex-direction: column; gap: 5px; font-size: 0.9rem; margin: 0; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 0.82rem; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--ink); }
+td { font-family: var(--f-mono); font-size: 0.9rem; }
+td .pre { color: var(--muted); }
+td.sum { font-weight: 500; }
+tfoot td { border-top: 1px solid var(--ink); border-bottom: 0; font-weight: 500; }
+tr.wk td:first-child { color: var(--muted); }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">뉴미디어 미학 · 7일간의 변화 · 2026.09.29 – 10.05</div>
+  <h1>AI의 발전과 그걸 지켜보는 내 기분</h1>
+  <p class="lead">요즘 다들 AI 발전 속도가 무섭다고 합니다. 저도 그렇습니다. 그런데 얼마나 빠르길래 무서운 걸까요? Claude Code나 Codex 같은 AI 에이전트는 하루에도 몇 번씩 패치된다길래, 7일 동안 직접 세어 보고 그걸 지켜보는 제 기분도 같이 기록했습니다.</p>
+  <figure>
+    <div class="week"><div class="wk"><span class="emoji" role="img" aria-label="당황한 표정">😳</span><span class="n">100</span><div class="bar" style="height:81px"></div><div class="d">9/29<small>화</small></div></div><div class="wk"><span class="emoji" role="img" aria-label="경악하는 표정">😱</span><span class="n">136</span><div class="bar" style="height:110px"></div><div class="d">9/30<small>수</small></div></div><div class="wk"><span class="emoji" role="img" aria-label="안도하는 표정">😌</span><span class="n">88</span><div class="bar" style="height:71px"></div><div class="d">10/1<small>목</small></div></div><div class="wk"><span class="emoji" role="img" aria-label="고민하는 표정">🤔</span><span class="n">106</span><div class="bar" style="height:86px"></div><div class="d">10/2<small>금</small></div></div><div class="wk"><span class="emoji" role="img" aria-label="곁눈질하며 씩 웃는 표정">😏</span><span class="n">89</span><div class="bar" style="height:72px"></div><div class="d">10/3<small>토</small></div></div><div class="wk"><span class="emoji" role="img" aria-label="신난 표정">😆</span><span class="n">27</span><div class="bar" style="height:22px"></div><div class="d">10/4<small>일</small></div></div><div class="wk"><span class="emoji" role="img" aria-label="의심하는 표정">🤨</span><span class="n">0</span><div class="bar" style="height:0px"></div><div class="d">10/5<small>월</small></div></div></div>
+    <figcaption class="note">막대는 그날 Claude Code 새 버전에 담긴 변경 건수, 표정은 그날의 내 기분.</figcaption>
+  </figure>
+</header>
+
+<section>
+  <div class="quiz">
+    <div class="eyebrow">본론 전에 퀴즈 하나</div>
+    <p class="q">AI 에이전트 네 가지(Claude Code, Codex, Copilot CLI, Gemini CLI)는 7일 동안 모두 합쳐 몇 번 새 버전을 냈을까요?</p>
+    <div class="choices">
+      <button type="button" id="quiz-7" data-v="7" aria-pressed="false"><b>7번</b><span>하루 한 번쯤</span></button>
+      <button type="button" id="quiz-21" data-v="21" aria-pressed="false"><b>21번</b><span>하루 세 번쯤</span></button>
+      <button type="button" id="quiz-74" data-v="74" aria-pressed="false"><b>74번</b><span>하루 열 번쯤</span></button>
+      <button type="button" id="quiz-200" data-v="200" aria-pressed="false"><b>200번</b><span>거의 매시간</span></button>
+    </div>
+    <p id="quiz-msg" aria-live="polite">하나 골라 보세요. 정답은 누르면 나옵니다.</p>
+    <div class="answer" id="answer" hidden>
+      <div class="stats">
+        <div><b>74</b><span>7일간 공개된 빌드. 영화 한 편(2시간 16분)마다 하나</span></div>
+        <div><b>15</b><span>그중 모두에게 배포되는 정식 릴리스</span></div>
+        <div><b>546</b><span>Claude Code 여섯 버전에 적힌 변경 항목</span></div>
+        <div><b>328</b><span>같은 기간 Codex 저장소에 쌓인 커밋</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>7일의 기록</h2>
+  <div class="legend">
+    <span>네모 1개 = Claude Code 변경 1건:</span>
+    <span><i class="k-added"></i>새 기능</span><span><i class="k-improved"></i>개선</span><span><i class="k-changed"></i>동작 변경</span><span><i class="k-fixed"></i>버그 수정</span>
+  </div>
+  <div class="legend">
+    <span>점 1개 = 배포 1번 (0시~24시):</span>
+    <span class="p-claude"><i class="dot"></i>Claude Code</span><span class="p-codex"><i class="dot"></i>Codex</span><span class="p-copilot"><i class="dot"></i>Copilot CLI</span><span class="p-gemini"><i class="dot"></i>Gemini CLI</span>
+    <span><i class="round"></i>정식</span><span><i class="hollow"></i>시험용</span>
+  </div>
+  <div class="board">
+    <div class="brow bhead"><div>AI의 발전</div><div>내 기분</div></div>
+    <div class="brow"><div class="ai"><div class="top"><b>9/29</b><span class="wd">화요일</span><span class="cnt">1일차</span></div><div class="cap"><b>Claude Code 2.1.284</b> · 변경 100건</div><div class="waffle" role="img" aria-label="변경 100건"><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i></div><div class="cap"><b>네 도구 배포 12번</b> · 정식 3</div><div class="strip"><i class="p-claude" style="left:9.10%;top:3px" title="Claude Code 2.1.284 02:11"></i><i class="p-codex pre" style="left:2.36%;top:13px" title="Codex 0.159.0-alpha.13 00:34"></i><i class="p-codex pre" style="left:21.25%;top:13px" title="Codex 0.160.0-alpha.2 05:06"></i><i class="p-codex pre" style="left:44.86%;top:13px" title="Codex 0.160.0-alpha.3 10:46"></i><i class="p-codex pre" style="left:65.49%;top:13px" title="Codex 0.160.0-alpha.6 15:43"></i><i class="p-codex" style="left:71.53%;top:13px" title="Codex 0.159.0 17:10"></i><i class="p-copilot pre" style="left:2.99%;top:23px" title="Copilot CLI 1.0.89-7 00:43"></i><i class="p-copilot" style="left:18.06%;top:23px" title="Copilot CLI 1.0.89 04:20"></i><i class="p-copilot pre" style="left:26.81%;top:23px" title="Copilot CLI 1.0.90-0 06:26"></i><i class="p-copilot pre" style="left:46.67%;top:23px" title="Copilot CLI 1.0.90-1 11:12"></i><i class="p-copilot pre" style="left:74.24%;top:23px" title="Copilot CLI 1.0.90-2 17:49"></i><i class="p-gemini pre" style="left:43.47%;top:33px" title="Gemini CLI 0.63.0-nightly.20260929.gfe6350238 10:26"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-claude"><i class="dot"></i><span>새 모델 Claude Sonnet 5.5 탑재</span></li><li class="p-claude"><i class="dot"></i><span>기본값이 알아서 승인하는 auto mode로</span></li><li class="p-codex"><i class="dot"></i><span>0.159.0: AI가 답하는 도중에 끼어들기</span></li><li class="p-copilot"><i class="dot"></i><span>경쟁사 Claude Code의 규칙 파일 읽기 시작</span></li></ul></div><div class="mood"><span class="face a-bob" role="img" aria-label="당황한 표정">😳</span><p class="say">역시 업데이트가 많군</p><span class="why">변경 100건 · 빌드 12개</span></div></div><div class="brow"><div class="ai"><div class="top"><b>9/30</b><span class="wd">수요일</span><span class="cnt">2일차</span></div><div class="cap"><b>Claude Code 2.1.285</b> · 변경 136건</div><div class="waffle" role="img" aria-label="변경 136건"><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i></div><div class="cap"><b>네 도구 배포 14번</b> · 정식 4</div><div class="strip"><i class="p-claude" style="left:10.56%;top:3px" title="Claude Code 2.1.285 02:32"></i><i class="p-codex pre" style="left:6.74%;top:13px" title="Codex 0.161.0-alpha.1 01:37"></i><i class="p-codex pre" style="left:15.62%;top:13px" title="Codex 0.161.0-alpha.2 03:45"></i><i class="p-codex" style="left:23.33%;top:13px" title="Codex 0.159.1 05:36"></i><i class="p-codex" style="left:37.71%;top:13px" title="Codex 0.159.2 09:03"></i><i class="p-codex pre" style="left:43.33%;top:13px" title="Codex 0.160.0-alpha.6.1 10:24"></i><i class="p-codex pre" style="left:48.54%;top:13px" title="Codex 0.161.0-alpha.3 11:39"></i><i class="p-codex pre" style="left:87.64%;top:13px" title="Codex 0.161.0-alpha.4 21:02"></i><i class="p-copilot pre" style="left:1.25%;top:23px" title="Copilot CLI 1.0.90-3 00:18"></i><i class="p-copilot pre" style="left:14.58%;top:23px" title="Copilot CLI 1.0.90-4 03:30"></i><i class="p-copilot pre" style="left:26.88%;top:23px" title="Copilot CLI 1.0.90-5 06:27"></i><i class="p-gemini pre" style="left:25.14%;top:33px" title="Gemini CLI 0.63.0-preview.0 06:02"></i><i class="p-gemini" style="left:26.74%;top:33px" title="Gemini CLI 0.62.0 06:25"></i><i class="p-gemini pre" style="left:44.31%;top:33px" title="Gemini CLI 0.64.0-nightly.20260930.g38700b4b3 10:38"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-claude"><i class="dot"></i><span><code>claude --desktop</code>, 백그라운드 30분 제한 등 주간 최대</span></li><li class="p-codex"><i class="dot"></i><span>오전에만 정식 패치 두 번, 새 모델 GPT-6.1 Sol 탑재</span></li><li class="p-gemini"><i class="dot"></i><span>0.62.0: 이번 주 유일한 정식 릴리스</span></li></ul></div><div class="mood"><span class="face a-shake" role="img" aria-label="경악하는 표정">😱</span><p class="say">어제도 많았는데 오늘은 이렇게 더 많다고?!!</p><span class="why">변경 100 → 136건</span></div></div><div class="brow"><div class="ai"><div class="top"><b>10/1</b><span class="wd">목요일</span><span class="cnt">3일차</span></div><div class="cap"><b>Claude Code 2.1.286</b> · 변경 88건</div><div class="waffle" role="img" aria-label="변경 88건"><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-other"></i></div><div class="cap"><b>네 도구 배포 17번</b> · 정식 3</div><div class="strip"><i class="p-claude" style="left:9.31%;top:3px" title="Claude Code 2.1.286 02:14"></i><i class="p-codex pre" style="left:21.81%;top:13px" title="Codex 0.161.0-alpha.5 05:14"></i><i class="p-codex" style="left:33.47%;top:13px" title="Codex 0.159.3 08:02"></i><i class="p-codex pre" style="left:39.03%;top:13px" title="Codex 0.160.0-alpha.6.2 09:22"></i><i class="p-codex pre" style="left:49.03%;top:13px" title="Codex 0.161.0-alpha.6 11:46"></i><i class="p-codex pre" style="left:54.65%;top:13px" title="Codex 0.161.0-alpha.7 13:07"></i><i class="p-codex pre" style="left:65.21%;top:13px" title="Codex 0.161.0-alpha.8 15:39"></i><i class="p-codex pre" style="left:74.31%;top:13px" title="Codex 0.161.0-alpha.9 17:50"></i><i class="p-codex pre" style="left:82.22%;top:13px" title="Codex 0.161.0-alpha.10 19:44"></i><i class="p-codex pre" style="left:90.00%;top:13px" title="Codex 0.161.0-alpha.11 21:36"></i><i class="p-codex pre" style="left:99.79%;top:13px" title="Codex 0.161.0-alpha.12 23:57"></i><i class="p-copilot pre" style="left:1.94%;top:23px" title="Copilot CLI 1.0.90-6 00:28"></i><i class="p-copilot pre" style="left:13.68%;top:23px" title="Copilot CLI 1.0.90-7 03:17"></i><i class="p-copilot" style="left:27.71%;top:23px" title="Copilot CLI 1.0.90 06:39"></i><i class="p-copilot pre" style="left:34.58%;top:23px" title="Copilot CLI 1.0.91-0 08:18"></i><i class="p-copilot pre" style="left:63.54%;top:23px" title="Copilot CLI 1.0.91-1 15:15"></i><i class="p-gemini pre" style="left:44.31%;top:33px" title="Gemini CLI 0.64.0-nightly.20261001.gc6bccb7ec 10:38"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-claude"><i class="dot"></i><span>권한 요청에 "2 of 5" 순서 표시, VS Code 북마크</span></li><li class="p-copilot"><i class="dot"></i><span>GPT-6.1 Sol을 25시간 만에 따라 탑재</span></li><li class="p-codex"><i class="dot"></i><span>알파 빌드 9개, 두 시간마다 하나</span></li></ul><p class="aside">시험용 빌드까지 세면 사실 이날이 주간 1위(17개)였습니다. 모르는 게 약.</p></div><div class="mood"><span class="face a-bob" role="img" aria-label="안도하는 표정">😌</span><p class="say">앞의 2일보다는 적군..</p><span class="why">변경 136 → 88건</span></div></div><div class="brow"><div class="ai"><div class="top"><b>10/2</b><span class="wd">금요일</span><span class="cnt">4일차</span></div><div class="cap"><b>Claude Code 2.1.287</b> · 변경 106건</div><div class="waffle" role="img" aria-label="변경 106건"><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i></div><div class="cap"><b>네 도구 배포 14번</b> · 정식 3</div><div class="strip"><i class="p-claude" style="left:8.26%;top:3px" title="Claude Code 2.1.287 01:59"></i><i class="p-codex pre" style="left:7.50%;top:13px" title="Codex 0.161.0-alpha.13 01:48"></i><i class="p-codex pre" style="left:20.49%;top:13px" title="Codex 0.159.0-alpha.12.1 04:55"></i><i class="p-codex" style="left:22.64%;top:13px" title="Codex 0.160.0 05:26"></i><i class="p-codex pre" style="left:34.38%;top:13px" title="Codex 0.162.0-alpha.1 08:15"></i><i class="p-codex pre" style="left:45.76%;top:13px" title="Codex 0.162.0-alpha.2 10:59"></i><i class="p-codex pre" style="left:53.68%;top:13px" title="Codex 0.162.0-alpha.3 12:53"></i><i class="p-codex pre" style="left:62.29%;top:13px" title="Codex 0.162.0-alpha.4 14:57"></i><i class="p-codex pre" style="left:72.64%;top:13px" title="Codex 0.162.0-alpha.5 17:26"></i><i class="p-codex pre" style="left:87.64%;top:13px" title="Codex 0.162.0-alpha.6 21:02"></i><i class="p-codex pre" style="left:95.90%;top:13px" title="Codex 0.162.0-alpha.7 23:01"></i><i class="p-copilot" style="left:10.07%;top:23px" title="Copilot CLI 1.0.91 02:25"></i><i class="p-copilot pre" style="left:28.40%;top:23px" title="Copilot CLI 1.0.92-0 06:49"></i><i class="p-gemini pre" style="left:44.31%;top:33px" title="Gemini CLI 0.64.0-nightly.20261002.gc9096a847 10:38"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-claude"><i class="dot"></i><span>Claude Mods: 플러그인이 더 깊은 동작까지 수정</span></li><li class="p-claude"><i class="dot"></i><span>AI를 옆에서 지켜보는 AI 「You should know」 등장</span></li><li class="p-codex"><i class="dot"></i><span>0.160.0 정식 배포, 3시간 뒤 벌써 다음 알파</span></li></ul></div><div class="mood"><span class="face a-tilt" role="img" aria-label="고민하는 표정">🤔</span><p class="say">앞으로 내 커리어는 어떤 방향을 잡아야 하나..</p><span class="why">다시 106건 · AI를 감독하는 AI</span></div></div><div class="brow"><div class="ai"><div class="top"><b>10/3</b><span class="wd">토요일 · 개천절</span><span class="cnt">5일차</span></div><div class="cap"><b>Claude Code 2.1.288</b> · 변경 89건</div><div class="waffle" role="img" aria-label="변경 89건"><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-added"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-changed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i></div><div class="cap"><b>네 도구 배포 8번</b> · 정식 1</div><div class="strip"><i class="p-claude" style="left:14.58%;top:3px" title="Claude Code 2.1.288 03:30"></i><i class="p-codex pre" style="left:32.99%;top:13px" title="Codex 0.162.0-alpha.8 07:55"></i><i class="p-codex pre" style="left:44.31%;top:13px" title="Codex 0.162.0-alpha.9 10:38"></i><i class="p-codex pre" style="left:79.93%;top:13px" title="Codex 0.162.0-alpha.10 19:11"></i><i class="p-copilot pre" style="left:4.86%;top:23px" title="Copilot CLI 1.0.92-1 01:10"></i><i class="p-copilot pre" style="left:16.94%;top:23px" title="Copilot CLI 1.0.92-2 04:04"></i><i class="p-copilot pre" style="left:29.58%;top:23px" title="Copilot CLI 1.0.92-3 07:06"></i><i class="p-gemini pre" style="left:43.96%;top:33px" title="Gemini CLI 0.64.0-nightly.20261003.gfb972b2f8 10:33"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-claude"><i class="dot"></i><span>실수로 지운 입력을 ↑ 키로 되살리기</span></li><li class="p-claude"><i class="dot"></i><span>수요일에 넣은 시간 제한, 사흘 만에 수정</span></li><li class="p-all"><i class="dot"></i><span>정식 릴리스는 Claude Code 하나뿐</span></li></ul></div><div class="mood"><span class="face a-bob" role="img" aria-label="곁눈질하며 씩 웃는 표정">😏</span><p class="say">빅테크도 휴일은 쉬엄쉬엄 하는가 보네</p><span class="why">정식 릴리스 3개 → 1개</span></div></div><div class="brow"><div class="ai"><div class="top"><b>10/4</b><span class="wd">일요일</span><span class="cnt">6일차</span></div><div class="cap"><b>Claude Code 2.1.289</b> · 변경 27건</div><div class="waffle" role="img" aria-label="변경 27건"><i class="k-added"></i><i class="k-improved"></i><i class="k-improved"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-fixed"></i><i class="k-other"></i></div><div class="cap"><b>네 도구 배포 3번</b> · 정식 1</div><div class="strip"><i class="p-claude" style="left:21.67%;top:3px" title="Claude Code 2.1.289 05:12"></i><i class="p-codex pre" style="left:22.50%;top:13px" title="Codex 0.162.0-alpha.11 05:24"></i><i class="p-codex pre" style="left:62.57%;top:13px" title="Codex 0.162.0-alpha.12 15:01"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-claude"><i class="dot"></i><span>어제 바꾼 인증 동작을 하루 만에 취소</span></li><li class="p-claude"><i class="dot"></i><span>27건 중 23건이 버그 수정</span></li><li class="p-all"><i class="dot"></i><span>Copilot CLI, Gemini CLI는 배포 0번</span></li></ul></div><div class="mood"><span class="face a-hop" role="img" aria-label="신난 표정">😆</span><p class="say">휴일이 최고다~</p><span class="why">빌드 3개 · 주간 최소</span></div></div><div class="brow"><div class="ai"><div class="top"><b>10/5</b><span class="wd">월요일</span><span class="cnt">7일차</span></div><div class="cap"><b>Claude Code</b> · 변경 0건</div><div class="empty">오늘은 새 버전 없음. 다음 버전은 내일 새벽 3시 12분에 옵니다.</div><div class="cap"><b>네 도구 배포 6번</b> · 정식 0</div><div class="strip"><i class="p-codex pre" style="left:3.82%;top:13px" title="Codex 0.162.0-alpha.13 00:55"></i><i class="p-codex pre" style="left:47.22%;top:13px" title="Codex 0.162.0-alpha.14 11:20"></i><i class="p-codex pre" style="left:93.54%;top:13px" title="Codex 0.162.0-alpha.15 22:27"></i><i class="p-copilot pre" style="left:18.89%;top:23px" title="Copilot CLI 1.0.92-4 04:32"></i><i class="p-copilot pre" style="left:96.11%;top:23px" title="Copilot CLI 1.0.92-5 23:04"></i><i class="p-gemini pre" style="left:44.65%;top:33px" title="Gemini CLI 0.64.0-nightly.20261005.gfb972b2f8 10:43"></i></div><div class="hours"><span>0시</span><span>6</span><span>12</span><span>18</span><span>24</span></div><ul class="chips"><li class="p-all"><i class="dot"></i><span>정식 릴리스 0개. 미국은 아직 일요일</span></li><li class="p-gemini"><i class="dot"></i><span>코드는 그대로, 날짜만 바뀐 나이틀리</span></li><li class="p-codex"><i class="dot"></i><span>알파 3개는 묵묵히 계속</span></li></ul></div><div class="mood"><span class="face a-tilt" role="img" aria-label="의심하는 표정">🤨</span><p class="say">너무 조용한데.. 폭풍 전야인가?</p><span class="why">정식 릴리스 0개</span></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>일주일을 한 장으로</h2>
+  <figure>
+    <div class="scroll"><svg class="timeline" viewBox="0 0 980 262" role="img" aria-label="9월 29일부터 10월 5일까지 네 도구의 배포 시각을 점으로 찍은 타임라인"><rect class="weekend" x="608.6" y="36" width="119.1" height="200"/><rect class="weekend" x="727.7" y="36" width="119.1" height="200"/><line class="grid" x1="132.0" y1="36" x2="132.0" y2="236"/><line class="noon" x1="191.6" y1="36" x2="191.6" y2="236"/><text class="day" x="191.6" y="24" text-anchor="middle">9/29 화</text><line class="grid" x1="251.1" y1="36" x2="251.1" y2="236"/><line class="noon" x1="310.7" y1="36" x2="310.7" y2="236"/><text class="day" x="310.7" y="24" text-anchor="middle">9/30 수</text><line class="grid" x1="370.3" y1="36" x2="370.3" y2="236"/><line class="noon" x1="429.9" y1="36" x2="429.9" y2="236"/><text class="day" x="429.9" y="24" text-anchor="middle">10/1 목</text><line class="grid" x1="489.4" y1="36" x2="489.4" y2="236"/><line class="noon" x1="549.0" y1="36" x2="549.0" y2="236"/><text class="day" x="549.0" y="24" text-anchor="middle">10/2 금</text><line class="grid" x1="608.6" y1="36" x2="608.6" y2="236"/><line class="noon" x1="668.1" y1="36" x2="668.1" y2="236"/><text class="day" x="668.1" y="24" text-anchor="middle">10/3 토</text><line class="grid" x1="727.7" y1="36" x2="727.7" y2="236"/><line class="noon" x1="787.3" y1="36" x2="787.3" y2="236"/><text class="day" x="787.3" y="24" text-anchor="middle">10/4 일</text><line class="grid" x1="846.9" y1="36" x2="846.9" y2="236"/><line class="noon" x1="906.4" y1="36" x2="906.4" y2="236"/><text class="day" x="906.4" y="24" text-anchor="middle">10/5 월</text><line class="grid" x1="966.0" y1="36" x2="966.0" y2="236"/><g class="p-claude"><text class="lane-name" x="0" y="67">Claude Code</text><text class="lane-sub" x="0" y="83">정식 6</text><line class="grid" x1="132" y1="66" x2="966" y2="66"/><circle class="stable" cx="142.8" cy="66" r="5.6"><title>Claude Code 2.1.284 · 9/29 02:11</title></circle><circle class="stable" cx="263.7" cy="66" r="5.6"><title>Claude Code 2.1.285 · 9/30 02:32</title></circle><circle class="stable" cx="381.4" cy="66" r="5.6"><title>Claude Code 2.1.286 · 10/1 02:14</title></circle><circle class="stable" cx="499.3" cy="66" r="5.6"><title>Claude Code 2.1.287 · 10/2 01:59</title></circle><circle class="stable" cx="625.9" cy="66" r="5.6"><title>Claude Code 2.1.288 · 10/3 03:30</title></circle><circle class="stable" cx="753.5" cy="66" r="5.6"><title>Claude Code 2.1.289 · 10/4 05:12</title></circle></g><g class="p-codex"><text class="lane-name" x="0" y="117">Codex</text><text class="lane-sub" x="0" y="133">정식 5 · 시험용 35</text><line class="grid" x1="132" y1="116" x2="966" y2="116"/><circle class="pre" cx="134.8" cy="116" r="3.3"><title>Codex 0.159.0-alpha.13 · 9/29 00:34</title></circle><circle class="pre" cx="157.3" cy="116" r="3.3"><title>Codex 0.160.0-alpha.2 · 9/29 05:06</title></circle><circle class="pre" cx="185.4" cy="116" r="3.3"><title>Codex 0.160.0-alpha.3 · 9/29 10:46</title></circle><circle class="pre" cx="210.0" cy="116" r="3.3"><title>Codex 0.160.0-alpha.6 · 9/29 15:43</title></circle><circle class="pre" cx="259.2" cy="116" r="3.3"><title>Codex 0.161.0-alpha.1 · 9/30 01:37</title></circle><circle class="pre" cx="269.8" cy="116" r="3.3"><title>Codex 0.161.0-alpha.2 · 9/30 03:45</title></circle><circle class="pre" cx="302.8" cy="116" r="3.3"><title>Codex 0.160.0-alpha.6.1 · 9/30 10:24</title></circle><circle class="pre" cx="309.0" cy="116" r="3.3"><title>Codex 0.161.0-alpha.3 · 9/30 11:39</title></circle><circle class="pre" cx="355.6" cy="116" r="3.3"><title>Codex 0.161.0-alpha.4 · 9/30 21:02</title></circle><circle class="pre" cx="396.3" cy="116" r="3.3"><title>Codex 0.161.0-alpha.5 · 10/1 05:14</title></circle><circle class="pre" cx="416.8" cy="116" r="3.3"><title>Codex 0.160.0-alpha.6.2 · 10/1 09:22</title></circle><circle class="pre" cx="428.7" cy="116" r="3.3"><title>Codex 0.161.0-alpha.6 · 10/1 11:46</title></circle><circle class="pre" cx="435.4" cy="116" r="3.3"><title>Codex 0.161.0-alpha.7 · 10/1 13:07</title></circle><circle class="pre" cx="448.0" cy="116" r="3.3"><title>Codex 0.161.0-alpha.8 · 10/1 15:39</title></circle><circle class="pre" cx="458.8" cy="116" r="3.3"><title>Codex 0.161.0-alpha.9 · 10/1 17:50</title></circle><circle class="pre" cx="468.2" cy="116" r="3.3"><title>Codex 0.161.0-alpha.10 · 10/1 19:44</title></circle><circle class="pre" cx="477.5" cy="116" r="3.3"><title>Codex 0.161.0-alpha.11 · 10/1 21:36</title></circle><circle class="pre" cx="489.2" cy="116" r="3.3"><title>Codex 0.161.0-alpha.12 · 10/1 23:57</title></circle><circle class="pre" cx="498.4" cy="116" r="3.3"><title>Codex 0.161.0-alpha.13 · 10/2 01:48</title></circle><circle class="pre" cx="513.8" cy="116" r="3.3"><title>Codex 0.159.0-alpha.12.1 · 10/2 04:55</title></circle><circle class="pre" cx="530.4" cy="116" r="3.3"><title>Codex 0.162.0-alpha.1 · 10/2 08:15</title></circle><circle class="pre" cx="544.0" cy="116" r="3.3"><title>Codex 0.162.0-alpha.2 · 10/2 10:59</title></circle><circle class="pre" cx="553.4" cy="116" r="3.3"><title>Codex 0.162.0-alpha.3 · 10/2 12:53</title></circle><circle class="pre" cx="563.6" cy="116" r="3.3"><title>Codex 0.162.0-alpha.4 · 10/2 14:57</title></circle><circle class="pre" cx="576.0" cy="116" r="3.3"><title>Codex 0.162.0-alpha.5 · 10/2 17:26</title></circle><circle class="pre" cx="593.8" cy="116" r="3.3"><title>Codex 0.162.0-alpha.6 · 10/2 21:02</title></circle><circle class="pre" cx="603.7" cy="116" r="3.3"><title>Codex 0.162.0-alpha.7 · 10/2 23:01</title></circle><circle class="pre" cx="647.9" cy="116" r="3.3"><title>Codex 0.162.0-alpha.8 · 10/3 07:55</title></circle><circle class="pre" cx="661.4" cy="116" r="3.3"><title>Codex 0.162.0-alpha.9 · 10/3 10:38</title></circle><circle class="pre" cx="703.8" cy="116" r="3.3"><title>Codex 0.162.0-alpha.10 · 10/3 19:11</title></circle><circle class="pre" cx="754.5" cy="116" r="3.3"><title>Codex 0.162.0-alpha.11 · 10/4 05:24</title></circle><circle class="pre" cx="802.3" cy="116" r="3.3"><title>Codex 0.162.0-alpha.12 · 10/4 15:01</title></circle><circle class="pre" cx="851.4" cy="116" r="3.3"><title>Codex 0.162.0-alpha.13 · 10/5 00:55</title></circle><circle class="pre" cx="903.1" cy="116" r="3.3"><title>Codex 0.162.0-alpha.14 · 10/5 11:20</title></circle><circle class="pre" cx="958.3" cy="116" r="3.3"><title>Codex 0.162.0-alpha.15 · 10/5 22:27</title></circle><circle class="stable" cx="217.2" cy="116" r="5.6"><title>Codex 0.159.0 · 9/29 17:10</title></circle><circle class="stable" cx="278.9" cy="116" r="5.6"><title>Codex 0.159.1 · 9/30 05:36</title></circle><circle class="stable" cx="296.1" cy="116" r="5.6"><title>Codex 0.159.2 · 9/30 09:03</title></circle><circle class="stable" cx="410.2" cy="116" r="5.6"><title>Codex 0.159.3 · 10/1 08:02</title></circle><circle class="stable" cx="516.4" cy="116" r="5.6"><title>Codex 0.160.0 · 10/2 05:26</title></circle></g><g class="p-copilot"><text class="lane-name" x="0" y="167">Copilot CLI</text><text class="lane-sub" x="0" y="183">정식 3 · 시험용 17</text><line class="grid" x1="132" y1="166" x2="966" y2="166"/><circle class="pre" cx="135.6" cy="166" r="3.3"><title>Copilot CLI 1.0.89-7 · 9/29 00:43</title></circle><circle class="pre" cx="163.9" cy="166" r="3.3"><title>Copilot CLI 1.0.90-0 · 9/29 06:26</title></circle><circle class="pre" cx="187.6" cy="166" r="3.3"><title>Copilot CLI 1.0.90-1 · 9/29 11:12</title></circle><circle class="pre" cx="220.4" cy="166" r="3.3"><title>Copilot CLI 1.0.90-2 · 9/29 17:49</title></circle><circle class="pre" cx="252.6" cy="166" r="3.3"><title>Copilot CLI 1.0.90-3 · 9/30 00:18</title></circle><circle class="pre" cx="268.5" cy="166" r="3.3"><title>Copilot CLI 1.0.90-4 · 9/30 03:30</title></circle><circle class="pre" cx="283.2" cy="166" r="3.3"><title>Copilot CLI 1.0.90-5 · 9/30 06:27</title></circle><circle class="pre" cx="372.6" cy="166" r="3.3"><title>Copilot CLI 1.0.90-6 · 10/1 00:28</title></circle><circle class="pre" cx="386.6" cy="166" r="3.3"><title>Copilot CLI 1.0.90-7 · 10/1 03:17</title></circle><circle class="pre" cx="411.5" cy="166" r="3.3"><title>Copilot CLI 1.0.91-0 · 10/1 08:18</title></circle><circle class="pre" cx="446.0" cy="166" r="3.3"><title>Copilot CLI 1.0.91-1 · 10/1 15:15</title></circle><circle class="pre" cx="523.3" cy="166" r="3.3"><title>Copilot CLI 1.0.92-0 · 10/2 06:49</title></circle><circle class="pre" cx="614.4" cy="166" r="3.3"><title>Copilot CLI 1.0.92-1 · 10/3 01:10</title></circle><circle class="pre" cx="628.8" cy="166" r="3.3"><title>Copilot CLI 1.0.92-2 · 10/3 04:04</title></circle><circle class="pre" cx="643.8" cy="166" r="3.3"><title>Copilot CLI 1.0.92-3 · 10/3 07:06</title></circle><circle class="pre" cx="869.4" cy="166" r="3.3"><title>Copilot CLI 1.0.92-4 · 10/5 04:32</title></circle><circle class="pre" cx="961.4" cy="166" r="3.3"><title>Copilot CLI 1.0.92-5 · 10/5 23:04</title></circle><circle class="stable" cx="153.5" cy="166" r="5.6"><title>Copilot CLI 1.0.89 · 9/29 04:20</title></circle><circle class="stable" cx="403.3" cy="166" r="5.6"><title>Copilot CLI 1.0.90 · 10/1 06:39</title></circle><circle class="stable" cx="501.4" cy="166" r="5.6"><title>Copilot CLI 1.0.91 · 10/2 02:25</title></circle></g><g class="p-gemini"><text class="lane-name" x="0" y="217">Gemini CLI</text><text class="lane-sub" x="0" y="233">정식 1 · 시험용 7</text><line class="grid" x1="132" y1="216" x2="966" y2="216"/><circle class="pre" cx="183.8" cy="216" r="3.3"><title>Gemini CLI 0.63.0-nightly.20260929.gfe6350238 · 9/29 10:26</title></circle><circle class="pre" cx="281.1" cy="216" r="3.3"><title>Gemini CLI 0.63.0-preview.0 · 9/30 06:02</title></circle><circle class="pre" cx="303.9" cy="216" r="3.3"><title>Gemini CLI 0.64.0-nightly.20260930.g38700b4b3 · 9/30 10:38</title></circle><circle class="pre" cx="423.1" cy="216" r="3.3"><title>Gemini CLI 0.64.0-nightly.20261001.gc6bccb7ec · 10/1 10:38</title></circle><circle class="pre" cx="542.2" cy="216" r="3.3"><title>Gemini CLI 0.64.0-nightly.20261002.gc9096a847 · 10/2 10:38</title></circle><circle class="pre" cx="660.9" cy="216" r="3.3"><title>Gemini CLI 0.64.0-nightly.20261003.gfb972b2f8 · 10/3 10:33</title></circle><circle class="pre" cx="900.1" cy="216" r="3.3"><title>Gemini CLI 0.64.0-nightly.20261005.gfb972b2f8 · 10/5 10:43</title></circle><circle class="stable" cx="283.0" cy="216" r="5.6"><title>Gemini CLI 0.62.0 · 9/30 06:25</title></circle></g></svg></div>
+    <figcaption class="note">꽉 찬 점은 정식 릴리스, 빈 점은 시험용 빌드. 실선은 자정, 점선은 정오(한국 시간), 음영은 주말. Codex 줄은 거의 점선이고, Claude Code는 매일 새벽에 딱 한 번입니다.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>이번 주 시상식</h2>
+  <div class="awards">
+    <div class="award p-codex">
+      <div class="big">40번</div>
+      <div class="prize">잠은 언제 자나요 상</div>
+      <div class="winner"><i class="dot"></i>Codex</div>
+      <p>바쁜 날엔 하루 10번, 두 시간마다 새 빌드.</p>
+    </div>
+    <div class="award p-claude">
+      <div class="big">6일 연속</div>
+      <div class="prize">개근상</div>
+      <div class="winner"><i class="dot"></i>Claude Code</div>
+      <p>화요일부터 일요일까지 매일 정확히 한 번. 주말에도 출석.</p>
+    </div>
+    <div class="award p-claude">
+      <div class="big">하루 만에</div>
+      <div class="prize">아 그거 취소요 상</div>
+      <div class="winner"><i class="dot"></i>Claude Code 2.1.289</div>
+      <p>토요일에 바꾼 걸 일요일에 되돌림. 일단 내놓고 고칩니다.</p>
+    </div>
+    <div class="award p-copilot">
+      <div class="big">25시간</div>
+      <div class="prize">눈치 빠른 상</div>
+      <div class="winner"><i class="dot"></i>Copilot CLI</div>
+      <p>경쟁사 새 모델을 하루 만에 따라 싣고, 경쟁사 설정 파일까지 읽기 시작.</p>
+    </div>
+    <div class="award p-gemini">
+      <div class="big">1번</div>
+      <div class="prize">고요한 존재감 상</div>
+      <div class="winner"><i class="dot"></i>Gemini CLI</div>
+      <p>정식 릴리스 한 번. Google이 Antigravity CLI로 갈아타는 중이라 조용합니다.</p>
+    </div>
+    <div class="award">
+      <div class="big">346건</div>
+      <div class="prize">숨은 일꾼 상</div>
+      <div class="winner">버그 수정</div>
+      <p>아무도 발표하지 않지만 변경 내역의 63%. 이번 주의 진짜 주인공.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>그래서, 무서웠나</h2>
+  <div class="moods" role="img" aria-label="일주일의 기분: 당황, 경악, 안도, 고민, 장난, 즐거움, 의심">😳 😱 😌 🤔 😏 😆 🤨</div>
+  <p class="punch">AI는 일주일 동안 74번 바뀌었고, 내 기분은 7번 바뀌었습니다.</p>
+  <div class="trio">
+    <div><b>소문은 절반만 사실</b><span>Claude Code의 정식 배포는 하루 한 번. 하지만 Codex의 시험용 빌드는 정말 두 시간마다 나왔습니다.</span></div>
+    <div><b>발전의 63%는 수리</b><span>새 기능은 9%뿐. 매일의 업데이트는 어제 만든 구멍을 오늘 메우는 일에 가깝습니다.</span></div>
+    <div><b>AI도 주말엔 쉰다</b><span>평일 하루 14개, 일요일 3개. 배포 버튼은 아직 사람의 일정에 맞춰 눌립니다.</span></div>
+  </div>
+  <figure>
+    <div class="split" role="img" aria-label="Claude Code 변경 546건의 구성: 새 기능 48, 개선 85, 동작 변경 65, 버그 수정 346, 기타 2">
+      <span class="k-added" style="width:8.8%"></span><span class="k-improved" style="width:15.6%"></span><span class="k-changed" style="width:11.9%"></span><span class="k-fixed" style="width:63.3%"></span><span class="k-other" style="width:0.4%"></span>
+    </div>
+    <div class="legend"><span><i class="k-added"></i>새 기능 48</span><span><i class="k-improved"></i>개선 85</span><span><i class="k-changed"></i>동작 변경 65</span><span><i class="k-fixed"></i>버그 수정 346</span></div>
+  </figure>
+  <p>세어 보고 나니 조금 덜 무섭습니다. 무서운 속도라기보다 부지런하고 꽤 인간적인 속도였습니다. 다만 월요일에 쓴 도구와 다음 월요일에 쓰는 도구가 546곳이 다르다면, 우리가 「같은 도구를 쓴다」고 말할 때 그 「같음」은 무엇일까요. 완성판 없이 계속 고쳐지는 소프트웨어를 팀 오라일리는 2005년에 「영원한 베타」라고 불렀는데, 20년 뒤 그 베타는 시간 단위로 돌아가고 있습니다.</p>
+  <div class="cookie">
+    <div class="eyebrow">쿠키 영상</div>
+    <p>조사가 끝난 바로 다음 날인 10월 6일, Claude Code는 새벽 3시 12분(변경 190건)과 낮 12시 32분에 두 번 업데이트됐습니다. 과제 기간이 하루만 길었어도 「하루 한 번」이라는 결론은 틀릴 뻔했습니다. <span class="emoji">🫠</span></p>
+    <p>그리고 이 보고서의 자료 수집과 페이지 제작은 조사 대상인 Claude Code가 도왔습니다. 관찰 대상이 자기 관찰 일지를 함께 쓴 셈입니다.</p>
+  </div>
+</section>
+
+<details>
+  <summary>조사 방법 · 숫자 표 · 출처 펼치기</summary>
+  <div class="inner">
+    <div class="scroll"><table><thead><tr><th>날짜 (KST)</th><th class="p-claude"><i class="dot"></i>Claude Code</th><th class="p-codex"><i class="dot"></i>Codex</th><th class="p-copilot"><i class="dot"></i>Copilot CLI</th><th class="p-gemini"><i class="dot"></i>Gemini CLI</th><th>합계</th></tr></thead><tbody><tr class=""><td>9/29 (화)</td><td>1 <span class="pre">+ 0</span></td><td>1 <span class="pre">+ 4</span></td><td>1 <span class="pre">+ 4</span></td><td>0 <span class="pre">+ 1</span></td><td class="sum">12</td></tr><tr class=""><td>9/30 (수)</td><td>1 <span class="pre">+ 0</span></td><td>2 <span class="pre">+ 5</span></td><td>0 <span class="pre">+ 3</span></td><td>1 <span class="pre">+ 2</span></td><td class="sum">14</td></tr><tr class=""><td>10/1 (목)</td><td>1 <span class="pre">+ 0</span></td><td>1 <span class="pre">+ 9</span></td><td>1 <span class="pre">+ 4</span></td><td>0 <span class="pre">+ 1</span></td><td class="sum">17</td></tr><tr class=""><td>10/2 (금)</td><td>1 <span class="pre">+ 0</span></td><td>1 <span class="pre">+ 9</span></td><td>1 <span class="pre">+ 1</span></td><td>0 <span class="pre">+ 1</span></td><td class="sum">14</td></tr><tr class="wk"><td>10/3 (토)</td><td>1 <span class="pre">+ 0</span></td><td>0 <span class="pre">+ 3</span></td><td>0 <span class="pre">+ 3</span></td><td>0 <span class="pre">+ 1</span></td><td class="sum">8</td></tr><tr class="wk"><td>10/4 (일)</td><td>1 <span class="pre">+ 0</span></td><td>0 <span class="pre">+ 2</span></td><td>0 <span class="pre">+ 0</span></td><td>0 <span class="pre">+ 0</span></td><td class="sum">3</td></tr><tr class=""><td>10/5 (월)</td><td>0 <span class="pre">+ 0</span></td><td>0 <span class="pre">+ 3</span></td><td>0 <span class="pre">+ 2</span></td><td>0 <span class="pre">+ 1</span></td><td class="sum">6</td></tr></tbody><tfoot><tr><td>7일 합계</td><td>6 <span class="pre">+ 0</span></td><td>5 <span class="pre">+ 35</span></td><td>3 <span class="pre">+ 17</span></td><td>1 <span class="pre">+ 7</span></td><td>74</td></tr></tfoot></table></div>
+    <p class="note">각 칸은 「정식 + 시험용 빌드」 개수. 날짜는 npm 등록 시각을 한국 시간으로 바꿔 나눴습니다.</p>
+    <ul>
+      <li><b>세는 기준.</b> npm 레지스트리에 새 버전이 등록된 것을 1회로 셌습니다. Codex의 운영체제별 패키지는 같은 버전이므로 제외했습니다.</li>
+      <li><b>날짜 기준.</b> 한국 시간 9월 29일 00:00부터 10월 5일 24:00까지. 원본 변경 내역은 미국 날짜라 하루씩 어긋나 보일 수 있습니다.</li>
+      <li><b>변경 건수.</b> Claude Code 공개 변경 내역의 줄 수이며, 각 줄의 첫 동사(Added, Fixed 등)로 자동 분류했습니다. Codex 등 다른 도구는 같은 형식의 기록이 없어 네모로 그리지 않았습니다.</li>
+      <li><b>대상.</b> 터미널용 에이전트 도구 네 가지. Cursor는 공식 changelog에서 이 기간의 항목을 찾지 못해 제외했습니다. 웹·앱·서버 쪽 변화는 집계에 없습니다.</li>
+      <li><b>모델 출시 등 바깥 사건.</b> 각 회사 공지 페이지에서 확인했고 날짜는 출처 표기(대부분 미국 기준)를 따랐습니다.</li>
+      <li><b>조사 시점.</b> 2026년 10월 6일.</li>
+    </ul>
+    <ul>
+      <li>npm 버전 기록: <a href="https://www.npmjs.com/package/@anthropic-ai/claude-code?activeTab=versions">@anthropic-ai/claude-code</a>, <a href="https://www.npmjs.com/package/@openai/codex?activeTab=versions">@openai/codex</a>, <a href="https://www.npmjs.com/package/@github/copilot?activeTab=versions">@github/copilot</a>, <a href="https://www.npmjs.com/package/@google/gemini-cli?activeTab=versions">@google/gemini-cli</a></li>
+      <li>변경 내역: <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">Claude Code CHANGELOG</a>, <a href="https://github.com/openai/codex/releases">Codex releases</a>, <a href="https://github.com/github/copilot-cli/releases">Copilot CLI releases</a>, <a href="https://github.com/google-gemini/gemini-cli/releases">Gemini CLI releases</a></li>
+      <li>공지: <a href="https://platform.claude.com/docs/en/release-notes/overview">Anthropic 릴리스 노트</a>, <a href="https://learn.chatgpt.com/docs/changelog">OpenAI Codex changelog</a>, <a href="https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/">Gemini CLI 전환 공지</a>, <a href="https://cursor.com/changelog">Cursor changelog</a></li>
+    </ul>
+  </div>
+</details>
+
+</div>
+
+<script>
+(function () {
+  var msgs = {
+    "7": "아쉽습니다. 7번은 Claude Code 혼자 낸 횟수(6번)에 가깝습니다.",
+    "21": "아쉽습니다. 정식 릴리스만 세면 15번이라 비슷하지만, 시험용 빌드까지 합치면 훨씬 많습니다.",
+    "74": "정답입니다. 혹시 미리 보셨나요?",
+    "200": "그 정도는 아닙니다. 다만 Codex 저장소의 커밋으로 세면 328번이니 감은 좋으십니다."
+  };
+  var btns = document.querySelectorAll(".choices button");
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) {
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+        x.classList.toggle("right", x.dataset.v === "74");
+      });
+      document.getElementById("quiz-msg").textContent = msgs[b.dataset.v];
+      document.getElementById("answer").hidden = false;
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
